@@ -27,3 +27,8 @@ Testando o serviço cors-anywhere, encontrei a limitação de precisar acessar e
 
 Repositório: https://github.com/petterkraus/dropmail-proxy
 Endereço da API: https://dropmailproxy.onrender.com
+
+
+## Fase 4 - Inbox
+
+Compreendendo a API, fui capaz de montar a query e enviar o ID para fazer a sessão do e-mail, com isso foi possível começar a montar a Inbox.
