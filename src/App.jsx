@@ -5,92 +5,112 @@ import { useState, useEffect } from "react";
 import { MdContentCopy } from "react-icons/md";
 
 function App() {
-  const [email, setEmail] = useState({
+  const [sessionData, setSessionData] = useState({
     email: "",
     expiresAt: "",
     id: "",
     token: "",
   });
+  const [inboxData, setInboxData] = useState({ mails: [] });
 
-  const [inbox, setInbox] = useState({mails:[]});
-  
-  const [session, setSession] = useState(false);
+  const [refreshStep, setRefreshStep] = useState(0);
+  const [isSessionActive, setIsSessionActive] = useState(false);
 
-  const [step, setStep] = useState(0);
+  useEffect(() => {
+    if (!isSessionActive) {
+      restorePreviousSession();
+      if (isSessionActive) return;
+    }
+    startSession();
+  }, [sessionData]);
 
-  async function handleGenerateMail() {
+  const restorePreviousSession = async () => {
+    const previousToken = localStorage.getItem("tm_token");
+    console.log(previousToken);
+    if (!previousToken) return;
+
+    const prevSession = {
+      email: localStorage.getItem("tm_email"),
+      id: localStorage.getItem("tm_id"),
+      token: localStorage.getItem("tm_token"),
+    };
+
+    setSessionData(prevSession);
+    startSession();
+  };
+
+  const startSession = async () => {
+    if (!sessionData.id) return;
+    startSessionRefreshTimer();
+    if (isSessionActive) return;
+    startInboxRefreshInterval();
+    setIsSessionActive(true);
+  };
+
+  const handleGenerateMail = async () => {
     try {
       const token = generateRandomString();
-      const response = await api.post("graphql/" + token, {
+      const response = await api.post(`graphql/${token}`, {
         query: createMailQuery,
       });
 
-      const obj = {
+      const newSession = {
         email: response.data.data.introduceSession.addresses[0].address,
         expiresAt: response.data.data.introduceSession.expiresAt,
         id: response.data.data.introduceSession.id,
         token,
       };
-      setEmail(obj);
+      setSessionData(newSession);
+      saveSession(newSession);
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  useEffect(() => {
-    console.log(email);
-    
-    if (!email.id) return;
+  const saveSession = (newSession) => {
+    localStorage.setItem("tm_token", newSession.token);
+    localStorage.setItem("tm_id", newSession.id);
+    localStorage.setItem("tm_email", newSession.email);
+  };
 
+  const startSessionRefreshTimer = () => {
     setInterval(() => {
-      if (email.id) setStep(1);
+      setRefreshStep(refreshStep + 1);
     }, 500);
-    if (session) return;
-    handleRefresh();
-    setSession(true);
-  }, [email]);
+  };
 
-  useEffect(() => {
-    console.log(inbox);
-    
-  }, [inbox]);
-
-  function handleRefresh() {
+  const startInboxRefreshInterval = () => {
     setInterval(() => {
-      handleSession();
+      refreshInbox();
     }, 15000);
-  }
+  };
 
-  async function handleSession() {
+  const refreshInbox = async () => {
     try {
-      if (!email.token) return;
-      const query = sessionQuery(email.id);
-      const response = await api.post("graphql/" + email.token, {
-        query: query,
+      if (!sessionData.token) return;
+      const query = sessionQuery(sessionData.id);
+      const response = await api.post(`graphql/${sessionData.token}`, {
+        query,
       });
-      console.log(response.data.data.session.mails);
 
-      setInbox({
+      setInboxData((prevInbox) => ({
+        ...prevInbox,        
         mails: response.data.data.session.mails,
-      });
-      
- 
+      }));
     } catch (error) {
       console.log(error);
     }
+  };
 
-    
-  }
   function handleCopy() {
     navigator.clipboard.writeText(email.email);
   }
-
   return (
     <>
-      {step === 0 && (
+      {refreshStep === 0 && (
         <div
           className={`flex flex-col justify-center items-center min-h-screen
-    ${email.id ? "transition-opacity duration-500 ease-in-out opacity-0" : null}
+    ${sessionData.id ? "transition-opacity duration-500 ease-in-out opacity-0" : null}
     `}
         >
           <h1 className="text-3xl font-bold">Temporary Mail</h1>
@@ -102,15 +122,15 @@ function App() {
           </button>
         </div>
       )}
-      {step === 1 && (
+      {refreshStep === 1 && (
         <div className=" min-h-screen">
           <div className={`flex flex-col items-center mt-7`}>
             <p className="text-sm">Your temporary email adress</p>
             <div className="flex">
               <input
-                className="border-t border-b border-l border-gray-500 rounded-tl-md rounded-bl-md h-8 pl-2"
+                className="border-t w-52 border-b border-l border-gray-500 rounded-tl-md rounded-bl-md h-8 pl-2"
                 readOnly
-                value={email.email}
+                value={sessionData.email}
               />
               <div
                 onClick={handleCopy}
@@ -123,10 +143,11 @@ function App() {
           </div>
           <div className="ml-2 mt-5">
             <h3>Inbox</h3>
-            {inbox.mails.length !== 0 && ( <>
-              <p>{inbox.mails[0].fromAddr} </p>
-              </>) }
-            
+            {inboxData.mails.length !== 0 && (
+              <>
+                <p>{inboxData.mails[0].fromAddr} </p>
+              </>
+            )}
           </div>
         </div>
       )}

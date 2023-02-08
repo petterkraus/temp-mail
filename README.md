@@ -32,3 +32,7 @@ Endereço da API: https://dropmailproxy.onrender.com
 ## Fase 4 - Inbox
 
 Compreendendo a API, fui capaz de montar a query e enviar o ID para fazer a sessão do e-mail, com isso foi possível começar a montar a Inbox.
+
+## Fase 5 - Persistência do e-mail
+
+Nessa fase eu comecei a desenvolver a função de persistência, ainda sem validação para caso o e-mail tenha expirado.
