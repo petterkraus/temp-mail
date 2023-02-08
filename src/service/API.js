@@ -1,0 +1,8 @@
+import axios from "axios";
+
+export default axios.create({
+  baseURL: ' http://cors-anywhere.herokuapp.com/https://dropmail.me/api/graphql/',
+  timeout: 10000,
+  headers: { "Content-Type": "application/json",  'X-Requested-With': 'XMLHttpRequest'  },
+
+});
