@@ -7,14 +7,5 @@
 
 -
 
-## Tecnologias
-- Vite
-- React
-- Tailwind
-- Axios
-- NanoID
 
-## Fase 1 - Explorando a API com axios
-
-Pra acessar com o axios, foi necessário fazer um post e enviar uma query para o GraphQL. Contudo, a API não possui CORs. Após alguns testes, consegui fazer uso do http://cors-anywhere.herokuapp.com/ para passar pela restrição.
 
