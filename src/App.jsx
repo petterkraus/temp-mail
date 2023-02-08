@@ -3,8 +3,15 @@ import api from "./service/API";
 import { createMailQuery, sessionQuery } from "./utils/querys";
 import { useState, useEffect } from "react";
 import { MdContentCopy } from "react-icons/md";
+import {
+  restoreFromStorage,
+  saveSession,
+  clearSessionStorage,
+} from "./utils/storage";
+
 
 function App() {
+  const timeInterval = 5;
   const [sessionData, setSessionData] = useState({
     email: "",
     expiresAt: "",
@@ -14,28 +21,34 @@ function App() {
   const [inboxData, setInboxData] = useState({ mails: [] });
 
   const [refreshStep, setRefreshStep] = useState(0);
+
   const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isIntervalOn, setIsIntervalOn] = useState(false);
+  const [timerRefresh, setTimerRefresh] = useState(timeInterval);
 
   useEffect(() => {
+    refreshInbox();
     if (!isSessionActive) {
       restorePreviousSession();
       if (isSessionActive) return;
     }
     startSession();
+    return () => {
+      
+    }
   }, [sessionData]);
 
+  
+
   const restorePreviousSession = async () => {
-    const previousToken = localStorage.getItem("tm_token");
-    
-    if (!previousToken) return;
+    const previousSession = restoreFromStorage();
 
-    const prevSession = {
-      email: localStorage.getItem("tm_email"),
-      id: localStorage.getItem("tm_id"),
-      token: localStorage.getItem("tm_token"),
-    };
+    if (sessionData.id !== "") return;
 
-    setSessionData(prevSession);
+    if (previousSession.session === false) return;
+
+    setSessionData(previousSession);
+
     startSession();
   };
 
@@ -67,22 +80,30 @@ function App() {
     }
   };
 
-  const saveSession = (newSession) => {
-    localStorage.setItem("tm_token", newSession.token);
-    localStorage.setItem("tm_id", newSession.id);
-    localStorage.setItem("tm_email", newSession.email);
-  };
-
   const startSessionRefreshTimer = () => {
-    setInterval(() => {
+    setTimeout(() => {
       setRefreshStep(refreshStep + 1);
     }, 500);
   };
 
-  const startInboxRefreshInterval = () => {
-    setInterval(() => {
-      refreshInbox();
-    }, 15000);
+  const startInboxRefreshInterval = (clear) => {
+    if (isIntervalOn) return;
+    
+    setIsIntervalOn(true);
+
+    const inboxRefresh = setInterval(() => {
+      setTimerRefresh((prevTimerRefresh) => {
+        if (prevTimerRefresh <= 0) {
+          setTimerRefresh(timeInterval);
+          refreshInbox();
+        }
+
+        return prevTimerRefresh - 1;
+      });
+    }, 1000);
+    if (clear) {
+      clearInterval(inboxRefresh);
+    }
   };
 
   const refreshInbox = async () => {
@@ -92,9 +113,11 @@ function App() {
       const response = await api.post(`graphql/${sessionData.token}`, {
         query,
       });
-
+      
+      console.log(response);
+      verifySession(response);
       setInboxData((prevInbox) => ({
-        ...prevInbox,        
+        ...prevInbox,
         mails: response.data.data.session.mails,
       }));
     } catch (error) {
@@ -102,15 +125,38 @@ function App() {
     }
   };
 
+  function verifySession(session) {
+    if (session.data.data.session === null) {
+      endSession();
+    }
+  }
+
+  function endSession() {
+    startInboxRefreshInterval(true);
+    clearSessionStorage();
+    setSessionData({
+      email: "",
+      expiresAt: "",
+      id: "",
+      token: "",
+    });
+    // setInboxData({ mails: [] });
+    setRefreshStep(refreshStep - 1);
+  }
+
   function handleCopy() {
-    navigator.clipboard.writeText(email.email);
+    navigator.clipboard.writeText(sessionData.email);
   }
   return (
     <>
       {refreshStep === 0 && (
         <div
           className={`flex flex-col justify-center items-center min-h-screen
-    ${sessionData.id ? "transition-opacity duration-500 ease-in-out opacity-0" : null}
+    ${
+      sessionData.id
+        ? "transition-opacity duration-500 ease-in-out opacity-0"
+        : null
+    }
     `}
         >
           <h1 className="text-3xl font-bold">Temporary Mail</h1>
@@ -140,12 +186,18 @@ function App() {
                 <button>Copy</button>
               </div>
             </div>
+            <div>
+              <p>{timerRefresh}</p>
+            </div>
           </div>
           <div className="ml-2 mt-5">
+            <button onClick={endSession}>Turn Off</button>
             <h3>Inbox</h3>
             {inboxData.mails.length !== 0 && (
               <>
-                <p>{inboxData.mails[0].fromAddr} </p>
+                {inboxData.mails.map((mail, index) => {
+                  return (<p key={index}> {mail.fromAddr} | {mail.text}</p>);
+                })}
               </>
             )}
           </div>
