@@ -26,7 +26,7 @@ function App() {
 
   const restorePreviousSession = async () => {
     const previousToken = localStorage.getItem("tm_token");
-    console.log(previousToken);
+    
     if (!previousToken) return;
 
     const prevSession = {
