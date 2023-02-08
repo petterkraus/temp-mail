@@ -14,9 +14,10 @@ function App() {
 
   async function handleGenerateMail() {
     try {
-      const response = await api.post(generateRandomString(), {
+      const response = await api.post('graphql/'  + generateRandomString(), {
         query: mutation,
       });
+      
       const obj = {
         email: response.data.data.introduceSession.addresses[0].address,
         expiresAt: response.data.data.introduceSession.expiresAt,
