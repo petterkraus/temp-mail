@@ -2,6 +2,8 @@ import { MdContentCopy } from "react-icons/md";
 import { IoMdRefresh } from "react-icons/io";
 import { IoPower } from "react-icons/io5";
 
+import { useState } from "react";
+
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
@@ -13,6 +15,14 @@ export default function AppMail({
   inboxData,
   forceRefresh,
 }) {
+  const [openedEmail, setOpenedEmail] = useState();
+
+  function openEmail(mail) {
+    setOpenedEmail(mail);
+    console.log(openedEmail);
+
+  }
+
   return (
     <div className=" min-h-screen">
       <div className={`flex flex-col items-center mt-7`}>
@@ -58,27 +68,35 @@ export default function AppMail({
           </div>
         </div>
       </div>
-      <div className="ml-4 mt-5 w-96 overflow-x-hidden">
-        <h3>Inbox</h3>
+      <div className="flex">
+        <div className="ml-4 mt-5 w-96 overflow-x-hidden">
+          <h3>Inbox</h3>
 
-        {inboxData.mails.length !== 0 && (
-          <>
-            {inboxData.mails.map((mail, index) => {
-              return (
-                <div
-                  key={index}
-                  className="border-b border-gray-300 pb-1"
-                >
-                  <p className="font-bold text-sky-700">{mail.headerSubject.length > 40 ? (mail.headerSubject.slice(0,40)+'...') : mail.headerSubject}</p>
-                  <p className="text-sm">{mail.text.slice(0,40)}...</p>
-                  <p className="text-sm font-bold text-gray-700">
-                    {mail.fromAddr}
-                  </p>
-                </div>
-              );
-            })}
-          </>
-        )}
+          {inboxData.mails.length !== 0 && (
+            <>
+              {inboxData.mails.map((mail, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="border-b border-gray-300 pb-1 cursor-pointer"
+                    onClick={() => openEmail(mail)}
+                  >
+                    <p className="font-bold text-sky-700">
+                      {mail.headerSubject.length > 40
+                        ? mail.headerSubject.slice(0, 40) + "..."
+                        : mail.headerSubject}
+                    </p>
+                    <p className="text-sm">{mail.text.slice(0, 40)}...</p>
+                    <p className="text-sm font-bold text-gray-700">
+                      {mail.fromAddr}
+                    </p>
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+        {openedEmail && openedEmail.html && (<div className="w-full mr-12 mt-12 pt-1 pb-10 h-fit bg-blue-400">{openedEmail.html}</div>)}
       </div>
     </div>
   );

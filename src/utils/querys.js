@@ -31,7 +31,8 @@ export function sessionQuery(sessionId) {
               toAddr,
               downloadUrl,
               text,
-              headerSubject
+              headerSubject,
+              html
           }
       }
   }

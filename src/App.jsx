@@ -195,7 +195,7 @@ function App() {
       token: "",
     });
     setInboxData({ mails: [] });
-    setRefreshStep(refreshStep - 1);
+    setRefreshStep(0);
   }
 
   function handleCopy() {
