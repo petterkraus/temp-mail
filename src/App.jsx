@@ -9,55 +9,93 @@ import {
   clearSessionStorage,
 } from "./utils/storage";
 
-
 function App() {
   const timeInterval = 5;
+
   const [sessionData, setSessionData] = useState({
     email: "",
-    expiresAt: "",
     id: "",
     token: "",
   });
+
+  const [restoredSessionData, setRestoredSessionData] = useState({
+    email: "",
+    id: "",
+    token: "",
+  });
+
+  const [sessionEmail, setSessionEmail] = useState("");
+
   const [inboxData, setInboxData] = useState({ mails: [] });
 
   const [refreshStep, setRefreshStep] = useState(0);
 
-  const [isSessionActive, setIsSessionActive] = useState(false);
-  // const [isIntervalOn, setIsIntervalOn] = useState(false);
   const [timerRefresh, setTimerRefresh] = useState(timeInterval);
 
-  useEffect(() => {
-    refreshInbox();
-    if (!isSessionActive) {
-      restorePreviousSession();
-      if (isSessionActive) return;
-    }
-    startSession();
-    return () => {
-      
-    }
-  }, [sessionData]);
+  let refreshIntervalId;
 
-  
-
-  const restorePreviousSession = async () => {
-    const previousSession = restoreFromStorage();
-
-    if (sessionData.id !== "") return;
-
-    if (previousSession.session === false) return;
-
-    setSessionData(previousSession);
-
-    startSession();
+  const startRefreshInterval = () => {
+    refreshIntervalId = setInterval(() => {
+      refreshInbox(sessionData);
+    }, 5000);
+  };
+  const startRefreshIntervaRestored = () => {
+    refreshIntervalId = setInterval(() => {
+      refreshInbox(restoredSessionData);
+    }, 5000);
   };
 
-  const startSession = async () => {
-    if (!sessionData.id) return;
+  const stopRefreshInterval = () => {
+    clearInterval(refreshIntervalId);
+  };
+  const stopRefreshIntervalRestored = () => {
+    clearInterval(refreshIntervalId);
+  };
+
+  useEffect(() => {
+    if (!restorePreviousSession()) return;
+    if (!restoredSessionData.token) return;
+
+    refreshInbox(restoredSessionData);
+
     startSessionRefreshTimer();
-    if (isSessionActive) return;
-    startInboxRefreshInterval();
-    setIsSessionActive(true);
+
+    startRefreshIntervaRestored();
+    return ()=> {
+      stopRefreshIntervalRestored();
+    }
+  }, [restoredSessionData]);
+
+  useEffect(() => {
+    console.log("montei");
+
+    if (!sessionData.token) return;
+    startRefreshInterval();
+
+    refreshInbox(sessionData);
+
+    startSessionRefreshTimer();
+    
+    return () => {
+      console.log("desmontei");
+      stopRefreshInterval();
+    };
+  }, [sessionData]);
+
+  const restorePreviousSession = async () => {
+    if (restoredSessionData.token) return;
+
+    const previousSession = restoreFromStorage();
+
+    if (sessionData.id !== "") return false;
+
+    if (previousSession.session === false) return false;
+
+    setRestoredSessionData(previousSession);
+
+    setSessionEmail(previousSession.email);
+
+    return true;
   };
 
   const handleGenerateMail = async () => {
@@ -66,14 +104,16 @@ function App() {
       const response = await api.post(`graphql/${token}`, {
         query: createMailQuery,
       });
-
       const newSession = {
         email: response.data.data.introduceSession.addresses[0].address,
-        expiresAt: response.data.data.introduceSession.expiresAt,
         id: response.data.data.introduceSession.id,
         token,
       };
+
       setSessionData(newSession);
+
+      setSessionEmail(newSession.email);
+
       saveSession(newSession);
     } catch (error) {
       console.log(error);
@@ -86,33 +126,36 @@ function App() {
     }, 500);
   };
 
-  const startInboxRefreshInterval = (clear) => {
-    // if (isIntervalOn) return;
-    // setIsIntervalOn(true);
+  function refreshNewSession() {
+    setTimerRefresh((prevTimerRefresh) => {
+      if (prevTimerRefresh <= 0) {
+        setTimerRefresh(timeInterval);
+        refreshInbox(sessionData);
+        console.log("oi");
+      }
+      return prevTimerRefresh - 1;
+    });
+  }
 
-    const inboxRefresh = setInterval(() => {
-      setTimerRefresh((prevTimerRefresh) => {
-        if (prevTimerRefresh <= 0) {
-          setTimerRefresh(timeInterval);
-          refreshInbox();
-        }
+  // function refreshRestoredSession() {
+  //   setTimerRefresh((prevTimerRefresh) => {
+  //     if (prevTimerRefresh <= 0) {
+  //       setTimerRefresh(timeInterval);
+  //       refreshInbox(restoredSessionData);
+  //       console.log("oi");
+  //     }
+  //     return prevTimerRefresh - 1;
+  //   });
+  // }
 
-        return prevTimerRefresh - 1;
-      });
-    }, 1000);
-    if (clear) {
-      clearInterval(inboxRefresh);
-    }
-  };
-
-  const refreshInbox = async () => {
+  async function refreshInbox(validSession) {
     try {
-      if (!sessionData.token) return;
-      const query = sessionQuery(sessionData.id);
-      const response = await api.post(`graphql/${sessionData.token}`, {
+      if (!validSession.token) return;
+      const query = sessionQuery(validSession.id);
+      const response = await api.post(`graphql/${validSession.token}`, {
         query,
       });
-      
+
       console.log(response);
       verifySession(response);
       setInboxData((prevInbox) => ({
@@ -122,7 +165,8 @@ function App() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }
+
 
   function verifySession(session) {
     if (session.data.data.session === null) {
@@ -131,11 +175,14 @@ function App() {
   }
 
   function endSession() {
-    startInboxRefreshInterval(true);
     clearSessionStorage();
     setSessionData({
       email: "",
-      expiresAt: "",
+      id: "",
+      token: "",
+    });
+    setRestoredSessionData({
+      email: "",
       id: "",
       token: "",
     });
@@ -175,7 +222,7 @@ function App() {
               <input
                 className="border-t w-52 border-b border-l border-gray-500 rounded-tl-md rounded-bl-md h-8 pl-2"
                 readOnly
-                value={sessionData.email}
+                value={sessionEmail}
               />
               <div
                 onClick={handleCopy}
@@ -195,7 +242,12 @@ function App() {
             {inboxData.mails.length !== 0 && (
               <>
                 {inboxData.mails.map((mail, index) => {
-                  return (<p key={index}> {mail.fromAddr} | {mail.text}</p>);
+                  return (
+                    <p key={index}>
+                      {" "}
+                      {mail.fromAddr} | {mail.text}
+                    </p>
+                  );
                 })}
               </>
             )}
