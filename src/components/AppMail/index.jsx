@@ -2,10 +2,15 @@ import { MdContentCopy } from "react-icons/md";
 import { IoMdRefresh } from "react-icons/io";
 import { IoPower } from "react-icons/io5";
 
+import { formatDate } from './../../utils/formatDate';
+
 import { useState } from "react";
+
+import DOMPurify from "dompurify";
 
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+
 
 export default function AppMail({
   sessionEmail,
@@ -18,9 +23,13 @@ export default function AppMail({
   const [openedEmail, setOpenedEmail] = useState();
 
   function openEmail(mail) {
-    setOpenedEmail(mail);
-    console.log(openedEmail);
+    let sanitezed_html = DOMPurify.sanitize(mail.html);
+    sanitezed_html = sanitezed_html.replace(/<a/g, '<a target="_blank"');
 
+    setOpenedEmail({
+      ...mail,
+      sanitezed_html,
+    });
   }
 
   return (
@@ -96,7 +105,23 @@ export default function AppMail({
             </>
           )}
         </div>
-        {openedEmail && openedEmail.html && (<div className="w-full mr-12 mt-12 pt-1 pb-10 h-fit bg-blue-400">{openedEmail.html}</div>)}
+        {openedEmail && openedEmail.html && (
+          <div className="w-full ml-6 mr-12 mt-12 pt-1 pb-10 h-fill">
+            <p className="text-sm font-bold text-gray-500">
+              {openedEmail.headerFrom}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDate(openedEmail.receivedAt)}
+
+            </p>
+            <p className="font-bold text-sky-700">
+              {openedEmail.headerSubject}
+            </p>
+            <div
+              dangerouslySetInnerHTML={{ __html: openedEmail.sanitezed_html }}
+            ></div>
+          </div>
+        )}
       </div>
     </div>
   );

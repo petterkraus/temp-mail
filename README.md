@@ -40,3 +40,8 @@ Nessa fase eu comecei a desenvolver a função de persistência, ainda sem valid
 ## Fase 6 - Refatoração 
 
 Refiz o código, depurando as principais funções, dividi responsabilidades das funções, separei em componentes as duas telas do software, resolvi bugs relacionados ao setInterval e comecei a trabalhar no layout agora que a funcionalidade está 100%.
+
+
+## Fase 7 - Layout e algumas funcionalidades
+
+Agora que o aplicativo já recebe com estabilidade os emails, passei a fazer a caixa de entrada com estilização para a mesma ficar legível. Coloquei informações úteis enviadas da API, sanitizei o html do corpo do email para poder apresentar com segurança, formatei a data para um layout amigável além de ajustar pequenos detalhes.

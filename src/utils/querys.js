@@ -1,14 +1,3 @@
-// export const createMailQuery = `
-// mutation {
-//   introduceSession {
-//       id,
-//       expiresAt,
-//       addresses {
-//         address
-//       }
-//   }
-// }
-// `;
 export const createMailQuery = `
 mutation {
   introduceSession(input: {withAddress: true,
@@ -26,13 +15,15 @@ export function sessionQuery(sessionId) {
   query {
       session(id: "${sessionId}") {
           mails{
-              rawSize,
               fromAddr,
               toAddr,
               downloadUrl,
               text,
               headerSubject,
-              html
+              html,
+              receivedAt,
+              headerFrom,
+              sanitizedHtml
           }
       }
   }
