@@ -28,24 +28,69 @@ function App2() {
 
   const [refreshStep, setRefreshStep] = useState(0);
 
-  const [restoredSession, setRestoredSession] = useState(false);
   const [timerRefresh, setTimerRefresh] = useState(timeInterval);
 
+  let intervalSession;
 
+  let intervalRestoredSession;
+
+
+function startIntervalSession() {
+  intervalSession = setNewInterval(() => {
+    refreshNewSession();
+  }, 1000);
+  intervalSession.start();
+}
+
+function startRestoredSession() {
+  intervalRestoredSession = setNewInterval(() => {
+    refreshRestoredSession();
+  }, 1000);
+  intervalRestoredSession.start();
+}
+
+  useEffect(() => {
+    if (!restorePreviousSession()) return;
+    if (!restoredSessionData.token) return;
+
+    refreshInbox(restoredSessionData);
+
+    startSessionRefreshTimer();
+
+    startRestoredSession()
+
+
+  }, [restoredSessionData]);
 
   useEffect(() => {
     if (!sessionData.token) return;
-    
+
     refreshInbox(sessionData);
-    
+
     startSessionRefreshTimer();
 
-    const intervalSession = setNewInterval(() => {
-      refreshNewSession();
-    }, 1000);
-
-    intervalSession.start();
+    startIntervalSession();
+  
   }, [sessionData]);
+
+
+
+
+  const restorePreviousSession = async () => {
+    if (restoredSessionData.token) return;
+
+    const previousSession = restoreFromStorage();
+
+    if (sessionData.id !== "") return false;
+
+    if (previousSession.session === false) return false;
+
+    setRestoredSessionData(previousSession);
+
+    setSessionEmail(previousSession.email);
+
+    return true;
+  };
 
   const handleGenerateMail = async () => {
     try {
@@ -80,7 +125,18 @@ function App2() {
       if (prevTimerRefresh <= 0) {
         setTimerRefresh(timeInterval);
         refreshInbox(sessionData);
-        console.log('oi');
+        console.log("oi");
+      }
+      return prevTimerRefresh - 1;
+    });
+  }
+
+  function refreshRestoredSession() {
+    setTimerRefresh((prevTimerRefresh) => {
+      if (prevTimerRefresh <= 0) {
+        setTimerRefresh(timeInterval);
+        refreshInbox(restoredSessionData);
+        console.log("oi");
       }
       return prevTimerRefresh - 1;
     });
@@ -131,18 +187,26 @@ function App2() {
   }
 
   function endSession() {
-    startInboxRefreshInterval(true);
     clearSessionStorage();
     setSessionData({
       email: "",
-      expiresAt: "",
+      id: "",
+      token: "",
+    });
+    setRestoredSessionData({
+      email: "",
       id: "",
       token: "",
     });
     setInboxData({ mails: [] });
     setRefreshStep(refreshStep - 1);
-    setIsSessionActive(false);
+    
+    intervalSession.stop();
+    intervalRestoredSession.stop();
+    
   }
+    
+  
 
   function handleCopy() {
     navigator.clipboard.writeText(sessionData.email);
