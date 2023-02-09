@@ -9,56 +9,43 @@ import {
   clearSessionStorage,
 } from "./utils/storage";
 
-
-function App() {
-  const timeInterval = 5;
+function App2() {
+  const timeInterval = 15;
   const [sessionData, setSessionData] = useState({
     email: "",
-    expiresAt: "",
     id: "",
     token: "",
   });
+  const [restoredSessionData, setRestoredSessionData] = useState({
+    email: "",
+    id: "",
+    token: "",
+  });
+
+  const [sessionEmail, setSessionEmail] = useState("");
+
   const [inboxData, setInboxData] = useState({ mails: [] });
 
   const [refreshStep, setRefreshStep] = useState(0);
 
-  const [isSessionActive, setIsSessionActive] = useState(false);
-  // const [isIntervalOn, setIsIntervalOn] = useState(false);
+  const [restoredSession, setRestoredSession] = useState(false);
   const [timerRefresh, setTimerRefresh] = useState(timeInterval);
 
+
+
   useEffect(() => {
-    refreshInbox();
-    if (!isSessionActive) {
-      restorePreviousSession();
-      if (isSessionActive) return;
-    }
-    startSession();
-    return () => {
-      
-    }
-  }, [sessionData]);
-
-  
-
-  const restorePreviousSession = async () => {
-    const previousSession = restoreFromStorage();
-
-    if (sessionData.id !== "") return;
-
-    if (previousSession.session === false) return;
-
-    setSessionData(previousSession);
-
-    startSession();
-  };
-
-  const startSession = async () => {
-    if (!sessionData.id) return;
+    if (!sessionData.token) return;
+    
+    refreshInbox(sessionData);
+    
     startSessionRefreshTimer();
-    if (isSessionActive) return;
-    startInboxRefreshInterval();
-    setIsSessionActive(true);
-  };
+
+    const intervalSession = setNewInterval(() => {
+      refreshNewSession();
+    }, 1000);
+
+    intervalSession.start();
+  }, [sessionData]);
 
   const handleGenerateMail = async () => {
     try {
@@ -66,14 +53,16 @@ function App() {
       const response = await api.post(`graphql/${token}`, {
         query: createMailQuery,
       });
-
       const newSession = {
         email: response.data.data.introduceSession.addresses[0].address,
-        expiresAt: response.data.data.introduceSession.expiresAt,
         id: response.data.data.introduceSession.id,
         token,
       };
+
       setSessionData(newSession);
+
+      setSessionEmail(newSession.email);
+
       saveSession(newSession);
     } catch (error) {
       console.log(error);
@@ -86,33 +75,25 @@ function App() {
     }, 500);
   };
 
-  const startInboxRefreshInterval = (clear) => {
-    // if (isIntervalOn) return;
-    // setIsIntervalOn(true);
+  function refreshNewSession() {
+    setTimerRefresh((prevTimerRefresh) => {
+      if (prevTimerRefresh <= 0) {
+        setTimerRefresh(timeInterval);
+        refreshInbox(sessionData);
+        console.log('oi');
+      }
+      return prevTimerRefresh - 1;
+    });
+  }
 
-    const inboxRefresh = setInterval(() => {
-      setTimerRefresh((prevTimerRefresh) => {
-        if (prevTimerRefresh <= 0) {
-          setTimerRefresh(timeInterval);
-          refreshInbox();
-        }
-
-        return prevTimerRefresh - 1;
-      });
-    }, 1000);
-    if (clear) {
-      clearInterval(inboxRefresh);
-    }
-  };
-
-  const refreshInbox = async () => {
+  async function refreshInbox(validSession) {
     try {
-      if (!sessionData.token) return;
-      const query = sessionQuery(sessionData.id);
-      const response = await api.post(`graphql/${sessionData.token}`, {
+      if (!validSession.token) return;
+      const query = sessionQuery(validSession.id);
+      const response = await api.post(`graphql/${validSession.token}`, {
         query,
       });
-      
+
       console.log(response);
       verifySession(response);
       setInboxData((prevInbox) => ({
@@ -122,7 +103,26 @@ function App() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }
+
+  function setNewInterval(fn, interval) {
+    let id;
+    let stopped = false;
+
+    function start() {
+      if (!id && !stopped) {
+        id = setInterval(fn, interval);
+      }
+    }
+
+    function stop() {
+      stopped = true;
+      clearInterval(id);
+      id = null;
+    }
+
+    return { start, stop };
+  }
 
   function verifySession(session) {
     if (session.data.data.session === null) {
@@ -141,6 +141,7 @@ function App() {
     });
     setInboxData({ mails: [] });
     setRefreshStep(refreshStep - 1);
+    setIsSessionActive(false);
   }
 
   function handleCopy() {
@@ -175,7 +176,7 @@ function App() {
               <input
                 className="border-t w-52 border-b border-l border-gray-500 rounded-tl-md rounded-bl-md h-8 pl-2"
                 readOnly
-                value={sessionData.email}
+                value={sessionEmail}
               />
               <div
                 onClick={handleCopy}
@@ -195,7 +196,12 @@ function App() {
             {inboxData.mails.length !== 0 && (
               <>
                 {inboxData.mails.map((mail, index) => {
-                  return (<p key={index}> {mail.fromAddr} | {mail.text}</p>);
+                  return (
+                    <p key={index}>
+                      {" "}
+                      {mail.fromAddr} | {mail.text}
+                    </p>
+                  );
                 })}
               </>
             )}
@@ -206,4 +212,4 @@ function App() {
   );
 }
 
-export default App;
+export default App2;

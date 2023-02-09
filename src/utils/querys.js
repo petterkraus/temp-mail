@@ -1,8 +1,19 @@
+// export const createMailQuery = `
+// mutation {
+//   introduceSession {
+//       id,
+//       expiresAt,
+//       addresses {
+//         address
+//       }
+//   }
+// }
+// `;
 export const createMailQuery = `
 mutation {
-  introduceSession {
+  introduceSession(input: {withAddress: true,
+                           domainId: "RG9tYWluOjc"}) {
       id,
-      expiresAt,
       addresses {
         address
       }
@@ -27,4 +38,3 @@ export function sessionQuery(sessionId) {
   `;
   return sessionQuery;
 }
-

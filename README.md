@@ -5,7 +5,7 @@
 
 ## Instruções
 
--## Tecnologias
+## Tecnologias
 - Vite
 - React
 - Tailwind
