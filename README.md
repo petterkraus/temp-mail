@@ -36,3 +36,7 @@ Compreendendo a API, fui capaz de montar a query e enviar o ID para fazer a sess
 ## Fase 5 - Persistência do e-mail
 
 Nessa fase eu comecei a desenvolver a função de persistência, ainda sem validação para caso o e-mail tenha expirado.
+
+## Fase 6 - Refatoração 
+
+Refiz o código, depurando as principais funções, dividi responsabilidades das funções, separei em componentes as duas telas do software, resolvi bugs relacionados ao setInterval e comecei a trabalhar no layout agora que a funcionalidade está 100%.

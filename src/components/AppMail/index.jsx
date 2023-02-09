@@ -1,0 +1,50 @@
+import { MdContentCopy } from "react-icons/md";
+import { IoMdRefresh } from "react-icons/io"
+import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+
+export default function AppMail({ sessionEmail, handleCopy, timerRefresh, endSession, inboxData, forceRefresh}) {
+  return (
+    <div className=" min-h-screen">
+      <div className={`flex flex-col items-center mt-7`}>
+        <p className="text-sm">Your temporary email adress</p>
+        <div className="flex">
+          <input
+            className="border-t w-52 border-b border-l border-gray-500 rounded-tl-md rounded-bl-md h-8 pl-2"
+            readOnly
+            value={sessionEmail}
+          />
+          <div
+            onClick={handleCopy}
+            className="flex items-center pl-2 pr-2 border border-gray-500 rounded-tr-md rounded-br-md cursor-pointer hover:drop-shadow-lg"
+          >
+            <MdContentCopy />
+            <button>Copy</button>
+          </div>
+        </div>
+        <div className="flex mt-1">
+          <p className="mr-1">Autorefresh in </p>
+          <div className="h-6 w-6 mr-2"><CircularProgressbarWithChildren value={timerRefresh} minValue={0} maxValue={15}> {timerRefresh} </CircularProgressbarWithChildren></div>
+          <div onClick={forceRefresh} className="cursor-pointer flex"><IoMdRefresh className="text-2xl mr-1" /> <span>Refresh</span></div>
+          
+        </div>
+      </div>
+      <div className="ml-2 mt-5">
+        <button onClick={endSession}>Turn Off</button>
+        <h3>Inbox</h3>
+        {inboxData.mails.length !== 0 && (
+          <>
+            {inboxData.mails.map((mail, index) => {
+              return (
+                <p key={index}>
+                  {" "}
+                  {mail.fromAddr} | {mail.text}
+                </p>
+              );
+            })}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

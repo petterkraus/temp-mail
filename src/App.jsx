@@ -1,8 +1,10 @@
 import generateRandomString from "./utils/randomString";
+import Landing from "./components/Landing";
+import AppMail from "./components/AppMail";
 import api from "./service/API";
 import { createMailQuery, sessionQuery } from "./utils/querys";
 import { useState, useEffect } from "react";
-import { MdContentCopy } from "react-icons/md";
+
 import {
   restoreFromStorage,
   saveSession,
@@ -10,18 +12,14 @@ import {
 } from "./utils/storage";
 
 function App() {
-  const timeInterval = 5;
+  const timeInterval = 15;
 
   const [sessionData, setSessionData] = useState({
-    email: "",
-    id: "",
-    token: "",
+    email: "", id: "", token: "",
   });
 
   const [restoredSessionData, setRestoredSessionData] = useState({
-    email: "",
-    id: "",
-    token: "",
+    email: "", id: "", token: "",
   });
 
   const [sessionEmail, setSessionEmail] = useState("");
@@ -32,25 +30,8 @@ function App() {
 
   const [timerRefresh, setTimerRefresh] = useState(timeInterval);
 
-  let refreshIntervalId;
-
-  const startRefreshInterval = () => {
-    refreshIntervalId = setInterval(() => {
-      refreshInbox(sessionData);
-    }, 5000);
-  };
-  const startRefreshIntervaRestored = () => {
-    refreshIntervalId = setInterval(() => {
-      refreshInbox(restoredSessionData);
-    }, 5000);
-  };
-
-  const stopRefreshInterval = () => {
-    clearInterval(refreshIntervalId);
-  };
-  const stopRefreshIntervalRestored = () => {
-    clearInterval(refreshIntervalId);
-  };
+  let refreshIntervalNew;
+  let refreshIntervalRestored;
 
   useEffect(() => {
     if (!restorePreviousSession()) return;
@@ -81,6 +62,59 @@ function App() {
       stopRefreshInterval();
     };
   }, [sessionData]);
+
+  const startRefreshInterval = () => {
+    refreshIntervalNew = setInterval(() => {
+      refreshNewSession();
+    }, 1000);
+  };
+  const startRefreshIntervaRestored = () => {
+    refreshIntervalRestored = setInterval(() => {
+      refreshRestoredSession();
+    }, 1000);
+  };
+
+  function refreshNewSession() {
+    setTimerRefresh((prevTimerRefresh) => {
+      if (prevTimerRefresh <= 0) {
+        setTimerRefresh(timeInterval);
+        refreshInbox(sessionData);
+      }
+      return prevTimerRefresh - 1;
+    });
+  }
+
+  function refreshRestoredSession() {
+    setTimerRefresh((prevTimerRefresh) => {
+      if (prevTimerRefresh <= 0) {
+        setTimerRefresh(timeInterval);
+        refreshInbox(restoredSessionData);
+      }
+      return prevTimerRefresh - 1;
+    });
+  }
+
+  const stopRefreshInterval = () => {
+    clearInterval(refreshIntervalNew);
+  };
+  const stopRefreshIntervalRestored = () => {
+    clearInterval(refreshIntervalRestored);
+  };
+
+  function forceRefresh(){
+    if (restoredSessionData.token) {
+      setTimerRefresh(timeInterval);
+      refreshInbox(restoredSessionData);
+      return;
+    }
+    if (sessionData.token) {
+      setTimerRefresh(timeInterval);
+      refreshInbox(sessionData);
+      return;
+    
+    }
+    
+  }
 
   const restorePreviousSession = async () => {
     if (restoredSessionData.token) return;
@@ -125,28 +159,6 @@ function App() {
       setRefreshStep(refreshStep + 1);
     }, 500);
   };
-
-  function refreshNewSession() {
-    setTimerRefresh((prevTimerRefresh) => {
-      if (prevTimerRefresh <= 0) {
-        setTimerRefresh(timeInterval);
-        refreshInbox(sessionData);
-        console.log("oi");
-      }
-      return prevTimerRefresh - 1;
-    });
-  }
-
-  // function refreshRestoredSession() {
-  //   setTimerRefresh((prevTimerRefresh) => {
-  //     if (prevTimerRefresh <= 0) {
-  //       setTimerRefresh(timeInterval);
-  //       refreshInbox(restoredSessionData);
-  //       console.log("oi");
-  //     }
-  //     return prevTimerRefresh - 1;
-  //   });
-  // }
 
   async function refreshInbox(validSession) {
     try {
@@ -196,63 +208,10 @@ function App() {
   return (
     <>
       {refreshStep === 0 && (
-        <div
-          className={`flex flex-col justify-center items-center min-h-screen
-    ${
-      sessionData.id
-        ? "transition-opacity duration-500 ease-in-out opacity-0"
-        : null
-    }
-    `}
-        >
-          <h1 className="text-3xl font-bold">Temporary Mail</h1>
-          <button
-            className="mt-8 border w-32 h-8 border-gray-600 rounded-lg"
-            onClick={handleGenerateMail}
-          >
-            Generate
-          </button>
-        </div>
+        <Landing handleGenerateMail={handleGenerateMail} sessionData={sessionData.id}/>
       )}
       {refreshStep === 1 && (
-        <div className=" min-h-screen">
-          <div className={`flex flex-col items-center mt-7`}>
-            <p className="text-sm">Your temporary email adress</p>
-            <div className="flex">
-              <input
-                className="border-t w-52 border-b border-l border-gray-500 rounded-tl-md rounded-bl-md h-8 pl-2"
-                readOnly
-                value={sessionEmail}
-              />
-              <div
-                onClick={handleCopy}
-                className="flex items-center pl-2 pr-2 border border-gray-500 rounded-tr-md rounded-br-md cursor-pointer hover:drop-shadow-lg"
-              >
-                <MdContentCopy />
-                <button>Copy</button>
-              </div>
-            </div>
-            <div>
-              <p>{timerRefresh}</p>
-            </div>
-          </div>
-          <div className="ml-2 mt-5">
-            <button onClick={endSession}>Turn Off</button>
-            <h3>Inbox</h3>
-            {inboxData.mails.length !== 0 && (
-              <>
-                {inboxData.mails.map((mail, index) => {
-                  return (
-                    <p key={index}>
-                      {" "}
-                      {mail.fromAddr} | {mail.text}
-                    </p>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        </div>
+        <AppMail sessionEmail={sessionEmail} handleCopy={handleCopy} timerRefresh={timerRefresh} endSession={endSession} inboxData={inboxData} forceRefresh={forceRefresh}/>
       )}
     </>
   );
