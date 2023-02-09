@@ -15,11 +15,15 @@ function App() {
   const timeInterval = 15;
 
   const [sessionData, setSessionData] = useState({
-    email: "", id: "", token: "",
+    email: "",
+    id: "",
+    token: "",
   });
 
   const [restoredSessionData, setRestoredSessionData] = useState({
-    email: "", id: "", token: "",
+    email: "",
+    id: "",
+    token: "",
   });
 
   const [sessionEmail, setSessionEmail] = useState("");
@@ -42,23 +46,20 @@ function App() {
     startSessionRefreshTimer();
 
     startRefreshIntervaRestored();
-    return ()=> {
+    return () => {
       stopRefreshIntervalRestored();
-    }
+    };
   }, [restoredSessionData]);
 
   useEffect(() => {
-    console.log("montei");
-
     if (!sessionData.token) return;
     startRefreshInterval();
 
     refreshInbox(sessionData);
 
     startSessionRefreshTimer();
-    
+
     return () => {
-      console.log("desmontei");
       stopRefreshInterval();
     };
   }, [sessionData]);
@@ -101,7 +102,7 @@ function App() {
     clearInterval(refreshIntervalRestored);
   };
 
-  function forceRefresh(){
+  function forceRefresh() {
     if (restoredSessionData.token) {
       setTimerRefresh(timeInterval);
       refreshInbox(restoredSessionData);
@@ -110,10 +111,7 @@ function App() {
     if (sessionData.token) {
       setTimerRefresh(timeInterval);
       refreshInbox(sessionData);
-      return;
-    
     }
-    
   }
 
   const restorePreviousSession = async () => {
@@ -157,7 +155,7 @@ function App() {
   const startSessionRefreshTimer = () => {
     setTimeout(() => {
       setRefreshStep(refreshStep + 1);
-    }, 500);
+    }, 800);
   };
 
   async function refreshInbox(validSession) {
@@ -168,7 +166,6 @@ function App() {
         query,
       });
 
-      console.log(response);
       verifySession(response);
       setInboxData((prevInbox) => ({
         ...prevInbox,
@@ -178,7 +175,6 @@ function App() {
       console.log(error);
     }
   }
-
 
   function verifySession(session) {
     if (session.data.data.session === null) {
@@ -203,15 +199,25 @@ function App() {
   }
 
   function handleCopy() {
-    navigator.clipboard.writeText(sessionData.email);
+    navigator.clipboard.writeText(sessionEmail);
   }
   return (
     <>
       {refreshStep === 0 && (
-        <Landing handleGenerateMail={handleGenerateMail} sessionData={sessionData.id}/>
+        <Landing
+          handleGenerateMail={handleGenerateMail}
+          sessionData={sessionData.id}
+        />
       )}
       {refreshStep === 1 && (
-        <AppMail sessionEmail={sessionEmail} handleCopy={handleCopy} timerRefresh={timerRefresh} endSession={endSession} inboxData={inboxData} forceRefresh={forceRefresh}/>
+        <AppMail
+          sessionEmail={sessionEmail}
+          handleCopy={handleCopy}
+          timerRefresh={timerRefresh}
+          endSession={endSession}
+          inboxData={inboxData}
+          forceRefresh={forceRefresh}
+        />
       )}
     </>
   );
