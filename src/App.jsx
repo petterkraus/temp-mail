@@ -88,7 +88,6 @@ function App() {
   function refreshRestoredSession() {
     setTimerRefresh((prevTimerRefresh) => {
       if (prevTimerRefresh <= 0) {
-        console.log('15');
         setTimerRefresh(timeInterval);
         refreshInbox(restoredSessionData);
       }

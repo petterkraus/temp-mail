@@ -6,7 +6,7 @@ import {
 } from "react-icons/io";
 import { IoPower } from "react-icons/io5";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { reactKey } from "./../../utils/randomString";
 
 import DOMPurify from "dompurify";
@@ -29,7 +29,33 @@ export default function AppMail({
   const [openedEmail, setOpenedEmail] = useState();
   const [avaliableNotifications, setAvaliableNotifications] = useState(false);
   const [sendNotification, setSendNotification] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
+  const emailRef = useRef(null);
+
+
+
+  
+  useEffect(() => {
+    if ("Notification" in window) {
+      setAvaliableNotifications(true);
+    }
+    
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+  
   function openEmail(mail) {
     let sanitezed_html = DOMPurify.sanitize(mail.html);
     sanitezed_html = sanitezed_html.replace(/<a/g, '<a target="_blank"');
@@ -38,15 +64,14 @@ export default function AppMail({
       ...mail,
       sanitezed_html,
     });
-  }
+    document.body.scrollTo({top: emailRef.current.offsetTop});
+    
+   }
 
-  useEffect(() => {
-    if ("Notification" in window) {
-      setAvaliableNotifications(true);
-    }
+   const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-    return () => {};
-  }, []);
 
   function handleNotification() {
     if (sendNotification) {
@@ -62,8 +87,8 @@ export default function AppMail({
   }
 
   return (
-    <div className=" min-h-screen">
-      <div className={`flex flex-col items-center mt-7`}>
+    <div className="h-screen">
+      <div className={`flex flex-col items-center pt-7`}>
         <p className="text-sm">Your temporary email adress</p>
         <div className="flex">
           <input
@@ -127,7 +152,7 @@ export default function AppMail({
               {inboxData.mails.map((mail, index) => {
                 return (
                   <InboxMail
-                    key={reactKey}
+                    key={index}
                     mail={mail}
                     openEmail={openEmail}
                     notification={sendNotification}
@@ -137,10 +162,18 @@ export default function AppMail({
             </>
           )}
         </div>
-        <div className="w-full flex">
+        <div className="w-full flex" ref={emailRef}>
           <OpenedMail openedEmail={openedEmail} />
         </div>
       </div>
+      {showScrollButton && (
+        <button
+          className="fixed bottom-5 right-5 m-4 p-2 bg-gray-300 hover:bg-gray-400 rounded shadow"
+          onClick={handleClick}
+        >
+          Scroll to Top
+        </button>
+      )}
     </div>
   );
 }
