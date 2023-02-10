@@ -3,7 +3,7 @@ import Landing from "./components/Landing";
 import AppMail from "./components/AppMail";
 import api from "./service/API";
 import { createMailQuery, sessionQuery } from "./utils/querys";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import {
   restoreFromStorage,
@@ -88,6 +88,7 @@ function App() {
   function refreshRestoredSession() {
     setTimerRefresh((prevTimerRefresh) => {
       if (prevTimerRefresh <= 0) {
+        console.log('15');
         setTimerRefresh(timeInterval);
         refreshInbox(restoredSessionData);
       }
@@ -168,6 +169,10 @@ function App() {
     
       if (!response.data.data.session.mails) return ;
 
+      const newMails = response.data.data.session.mails;
+
+      if (JSON.stringify(newMails) === JSON.stringify(inboxData.mails)) return;
+
       setInboxData((prevInbox) => ({
         ...prevInbox,
         mails: response.data.data.session.mails,
@@ -177,12 +182,6 @@ function App() {
       console.log(error);
     }
   }
-
-  // function verifySession(session) {
-  //   if (!session.data.data.session.mails) {
-  //    return false;
-  //   }
-  // }
 
   function endSession() {
     clearSessionStorage();

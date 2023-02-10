@@ -1,8 +1,12 @@
 import { MdContentCopy } from "react-icons/md";
-import { IoMdRefresh } from "react-icons/io";
+import {
+  IoMdRefresh,
+  IoIosNotifications,
+  IoMdNotificationsOff,
+} from "react-icons/io";
 import { IoPower } from "react-icons/io5";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { reactKey } from "./../../utils/randomString";
 
 import DOMPurify from "dompurify";
@@ -11,8 +15,8 @@ import InboxMail from "./components/InboxMail";
 
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import OpenedMail from './components/OpenedMail';
-import EmptyInbox from './components/EmptyInbox';
+import OpenedMail from "./components/OpenedMail";
+import EmptyInbox from "./components/EmptyInbox";
 
 export default function AppMail({
   sessionEmail,
@@ -23,6 +27,8 @@ export default function AppMail({
   forceRefresh,
 }) {
   const [openedEmail, setOpenedEmail] = useState();
+  const [avaliableNotifications, setAvaliableNotifications] = useState(false);
+  const [sendNotification, setSendNotification] = useState(false);
 
   function openEmail(mail) {
     let sanitezed_html = DOMPurify.sanitize(mail.html);
@@ -31,6 +37,27 @@ export default function AppMail({
     setOpenedEmail({
       ...mail,
       sanitezed_html,
+    });
+  }
+
+  useEffect(() => {
+    if ("Notification" in window) {
+      setAvaliableNotifications(true);
+    }
+
+    return () => {};
+  }, []);
+
+  function handleNotification() {
+    if (sendNotification) {
+      return setSendNotification(false);
+    }
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        setSendNotification(true);
+      } else {
+        setSendNotification(false);
+      }
     });
   }
 
@@ -81,22 +108,26 @@ export default function AppMail({
       </div>
       <div className="flex">
         <div className="ml-4 mt-5 w-96 overflow-x-hidden">
-          <div className="border-b  mb-2 border-gray-300">
+          <div className="border-b flex gap-2 items-center mb-2 border-gray-300 disp">
             <h3 className="font-bold">Inbox</h3>
+            <div 
+            onClick={handleNotification}
+            className={!avaliableNotifications ? "hidden" : null}
+            >
+            {sendNotification ?  (<IoIosNotifications />) :  <IoMdNotificationsOff />}
+            </div>
           </div>
-          {inboxData.mails.length === 0 && (
-            <EmptyInbox />
-          )
-          }
+          {inboxData.mails.length === 0 && <EmptyInbox />}
           {inboxData.mails.length !== 0 && (
             <>
               {inboxData.mails.map((mail, index) => {
                 return (
-                    <InboxMail
-                      key={reactKey()}
-                      mail={mail}
-                      openEmail={openEmail}
-                    />
+                  <InboxMail
+                    key={reactKey}
+                    mail={mail}
+                    openEmail={openEmail}
+                    notification={sendNotification}
+                  />
                 );
               })}
             </>

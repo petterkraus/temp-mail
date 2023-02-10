@@ -1,4 +1,30 @@
-export default function InboxMail({ mail, openEmail, index, ...props }) {
+import { useEffect, useState } from "react";
+export default function InboxMail({
+  mail,
+  openEmail,
+  index,
+  notification,
+  ...props
+}) {
+
+  const [notificationShown, setNotificationShown] = useState(false);
+
+useEffect(() => {
+  if (!mail || notificationShown || !notification) return;
+
+  const mailNotification = new Notification("New e-mail!", {
+    body: "Open the application to see your new e-mail!",
+  });
+
+  setTimeout(() => {
+    mailNotification.close();
+  }, 5000);
+
+  setNotificationShown(true);
+
+  return () => {};
+}, []);
+
   return (
     <div
       className="border-b border-gray-300 pb-1 cursor-pointer"
