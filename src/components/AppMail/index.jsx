@@ -12,6 +12,7 @@ import InboxMail from "./components/InboxMail";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import OpenedMail from './components/OpenedMail';
+import EmptyInbox from './components/EmptyInbox';
 
 export default function AppMail({
   sessionEmail,
@@ -83,7 +84,10 @@ export default function AppMail({
           <div className="border-b  mb-2 border-gray-300">
             <h3 className="font-bold">Inbox</h3>
           </div>
-
+          {inboxData.mails.length === 0 && (
+            <EmptyInbox />
+          )
+          }
           {inboxData.mails.length !== 0 && (
             <>
               {inboxData.mails.map((mail, index) => {

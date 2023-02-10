@@ -23,7 +23,7 @@ npm run dev
 4. Acesse a aplicação:
 Uma vez que a aplicação iniciou, um link será exibido no terminal. Copie e cole-o em seu navegador de web para acessar a aplicação.
 
-Observe que é importante garantir que você tenha o [Node.js](https://nodejs.org/) e o [npm](https://www.npmjs.com/) instalados em sua máquina antes de seguir as etapas acima.
+>Observe que é importante garantir que você tenha o [Node.js](https://nodejs.org/) e o [npm](https://www.npmjs.com/) instalados em sua máquina antes de seguir as etapas acima.
 
 ## Tecnologias Aplicadas
 - [Vite](https://github.com/vitejs/vite)

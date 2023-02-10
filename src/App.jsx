@@ -160,19 +160,21 @@ function App() {
 
   async function refreshInbox(validSession) {
     try {
-      if (!validSession.token) return;
+      if (!validSession.token) return endSession();
       const query = sessionQuery(validSession.id);
       const response = await api.post(`graphql/${validSession.token}`, {
         query,
       });
+    
+      if (!response.data.data.session.mails) return ;
 
       setInboxData((prevInbox) => ({
         ...prevInbox,
         mails: response.data.data.session.mails,
       }));
     } catch (error) {
-      console.log(error);
       endSession();
+      console.log(error);
     }
   }
 
