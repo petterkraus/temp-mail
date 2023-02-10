@@ -98,16 +98,6 @@ export default function AppMail({
             </>
           )}
         </div>
-        {!openedEmail && (
-          <div className="w-full ml-6 mr-12 px-4 py-4 mt-12 pb-10 h-fill bg-gray-200 rounded-xl">
-            {" "}
-            <p className="text-xs text-gray-500">
-              {" "}
-              Your Inbox is Ready! <br /> Your e-mails will show up on the left,
-              just click on them once to open here.{" "}
-            </p>
-          </div>
-        )}
         <OpenedMail openedEmail={openedEmail} />
       </div>
     </div>
