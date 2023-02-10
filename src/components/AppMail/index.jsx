@@ -1,20 +1,18 @@
+import React, { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
+import "react-circular-progressbar/dist/styles.css";
+
 import { MdContentCopy } from "react-icons/md";
 import {
   IoMdRefresh,
   IoIosNotifications,
   IoMdNotificationsOff,
+  
 } from "react-icons/io";
-import { IoPower } from "react-icons/io5";
-
-import { useState, useEffect, useRef } from "react";
-import { reactKey } from "./../../utils/randomString";
-
-import DOMPurify from "dompurify";
-
-import InboxMail from "./components/InboxMail";
+import { IoPower, IoArrowUpCircle } from "react-icons/io5";
 
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
+import InboxMail from "./components/InboxMail";
 import OpenedMail from "./components/OpenedMail";
 import EmptyInbox from "./components/EmptyInbox";
 
@@ -31,16 +29,11 @@ export default function AppMail({
   const [sendNotification, setSendNotification] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  const emailRef = useRef(null);
-
-
-
-  
   useEffect(() => {
     if ("Notification" in window) {
       setAvaliableNotifications(true);
     }
-    
+
     const handleScroll = () => {
       if (window.scrollY > 300) {
         setShowScrollButton(true);
@@ -50,12 +43,12 @@ export default function AppMail({
     };
 
     window.addEventListener("scroll", handleScroll);
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  
+
   function openEmail(mail) {
     let sanitezed_html = DOMPurify.sanitize(mail.html);
     sanitezed_html = sanitezed_html.replace(/<a/g, '<a target="_blank"');
@@ -64,14 +57,11 @@ export default function AppMail({
       ...mail,
       sanitezed_html,
     });
-    document.body.scrollTo({top: emailRef.current.offsetTop});
-    
-   }
+  }
 
-   const handleClick = () => {
+  const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   function handleNotification() {
     if (sendNotification) {
@@ -162,16 +152,18 @@ export default function AppMail({
             </>
           )}
         </div>
-        <div className="w-full flex" ref={emailRef}>
+        <div
+          className="w-full flex"
+        >
           <OpenedMail openedEmail={openedEmail} />
         </div>
       </div>
       {showScrollButton && (
         <button
-          className="fixed bottom-5 right-5 m-4 p-2 bg-gray-300 hover:bg-gray-400 rounded shadow"
-          onClick={handleClick}
+          className="fixed bottom-5 right-5 m-4 p-2 text-4xl hover:text-gray-800 rounded shadow"
+          onClick={handleScrollToTop}
         >
-          Scroll to Top
+          <IoArrowUpCircle />
         </button>
       )}
     </div>
