@@ -1,6 +1,10 @@
-import { customAlphabet } from 'nanoid'
+import { customAlphabet, nanoid } from 'nanoid'
 
-export default function generateRandomString() {
-    const nanoid = customAlphabet('1234567890abcdefghijklmonpqrstuvxzywABCDEFGHIJKLMNOPQRSTUVXZYW', 8)
+export function generateRandomString() {
+    const randomString = customAlphabet('1234567890abcdefghijklmonpqrstuvxzywABCDEFGHIJKLMNOPQRSTUVXZYW', 8)
+    return randomString(8);
+}
+
+export function reactKey() {
     return nanoid(8);
 }

@@ -2,15 +2,16 @@ import { MdContentCopy } from "react-icons/md";
 import { IoMdRefresh } from "react-icons/io";
 import { IoPower } from "react-icons/io5";
 
-import { formatDate } from './../../utils/formatDate';
-
 import { useState } from "react";
+import { reactKey } from "./../../utils/randomString";
 
 import DOMPurify from "dompurify";
 
+import InboxMail from "./components/InboxMail";
+
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-
+import OpenedMail from './components/OpenedMail';
 
 export default function AppMail({
   sessionEmail,
@@ -79,49 +80,35 @@ export default function AppMail({
       </div>
       <div className="flex">
         <div className="ml-4 mt-5 w-96 overflow-x-hidden">
-          <h3>Inbox</h3>
+          <div className="border-b  mb-2 border-gray-300">
+            <h3 className="font-bold">Inbox</h3>
+          </div>
 
           {inboxData.mails.length !== 0 && (
             <>
               {inboxData.mails.map((mail, index) => {
                 return (
-                  <div
-                    key={index}
-                    className="border-b border-gray-300 pb-1 cursor-pointer"
-                    onClick={() => openEmail(mail)}
-                  >
-                    <p className="font-bold text-sky-700">
-                      {mail.headerSubject.length > 40
-                        ? mail.headerSubject.slice(0, 40) + "..."
-                        : mail.headerSubject}
-                    </p>
-                    <p className="text-sm">{mail.text.slice(0, 40)}...</p>
-                    <p className="text-sm font-bold text-gray-700">
-                      {mail.fromAddr}
-                    </p>
-                  </div>
+                    <InboxMail
+                      key={reactKey()}
+                      mail={mail}
+                      openEmail={openEmail}
+                    />
                 );
               })}
             </>
           )}
         </div>
-        {openedEmail && openedEmail.html && (
-          <div className="w-full ml-6 mr-12 mt-12 pt-1 pb-10 h-fill">
-            <p className="text-sm font-bold text-gray-500">
-              {openedEmail.headerFrom}
-            </p>
+        {!openedEmail && (
+          <div className="w-full ml-6 mr-12 px-4 py-4 mt-12 pb-10 h-fill bg-gray-200 rounded-xl">
+            {" "}
             <p className="text-xs text-gray-500">
-              {formatDate(openedEmail.receivedAt)}
-
+              {" "}
+              Your Inbox is Ready! <br /> Your e-mails will show up on the left,
+              just click on them once to open here.{" "}
             </p>
-            <p className="font-bold text-sky-700">
-              {openedEmail.headerSubject}
-            </p>
-            <div
-              dangerouslySetInnerHTML={{ __html: openedEmail.sanitezed_html }}
-            ></div>
           </div>
         )}
+        <OpenedMail openedEmail={openedEmail} />
       </div>
     </div>
   );

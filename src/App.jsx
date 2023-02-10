@@ -1,4 +1,4 @@
-import generateRandomString from "./utils/randomString";
+import {generateRandomString} from "./utils/randomString";
 import Landing from "./components/Landing";
 import AppMail from "./components/AppMail";
 import api from "./service/API";
@@ -166,21 +166,21 @@ function App() {
         query,
       });
 
-      verifySession(response);
       setInboxData((prevInbox) => ({
         ...prevInbox,
         mails: response.data.data.session.mails,
       }));
     } catch (error) {
       console.log(error);
-    }
-  }
-
-  function verifySession(session) {
-    if (session.data.data.session === null) {
       endSession();
     }
   }
+
+  // function verifySession(session) {
+  //   if (!session.data.data.session.mails) {
+  //    return false;
+  //   }
+  // }
 
   function endSession() {
     clearSessionStorage();
