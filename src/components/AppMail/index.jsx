@@ -106,15 +106,19 @@ export default function AppMail({
           </div>
         </div>
       </div>
-      <div className="flex">
-        <div className="ml-4 mt-5 w-96 overflow-x-hidden">
+      <div className="flex max-md:flex-col">
+        <div className="ml-4 mt-5 w-96 overflow-x-hidden max-md:w-full">
           <div className="border-b flex gap-2 items-center mb-2 border-gray-300 disp">
             <h3 className="font-bold">Inbox</h3>
-            <div 
-            onClick={handleNotification}
-            className={!avaliableNotifications ? "hidden" : null}
+            <div
+              onClick={handleNotification}
+              className={!avaliableNotifications ? "hidden" : null}
             >
-            {sendNotification ?  (<IoIosNotifications />) :  <IoMdNotificationsOff />}
+              {sendNotification ? (
+                <IoIosNotifications />
+              ) : (
+                <IoMdNotificationsOff />
+              )}
             </div>
           </div>
           {inboxData.mails.length === 0 && <EmptyInbox />}
@@ -133,7 +137,9 @@ export default function AppMail({
             </>
           )}
         </div>
-        <OpenedMail openedEmail={openedEmail} />
+        <div className="w-full flex">
+          <OpenedMail openedEmail={openedEmail} />
+        </div>
       </div>
     </div>
   );
