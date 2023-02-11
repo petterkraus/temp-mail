@@ -123,8 +123,8 @@ export default function AppMail({
         </div>
       </div>
       <div className="flex max-md:flex-col">
-        <div className="ml-4 mt-5 w-96 overflow-x-hidden max-md:w-full">
-          <div className="border-b flex gap-2 items-center mb-2 border-gray-300 disp">
+        <div className="ml-4 mt-5 w-96 overflow-x-hidden max-md:w-full max-md:pr-8">
+          <div className="border-b flex gap-2 items-center mb-2 border-gray-300 ">
             <h3 className="font-bold">Inbox</h3>
             <div
               onClick={handleNotification}

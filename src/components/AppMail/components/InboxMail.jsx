@@ -22,7 +22,6 @@ useEffect(() => {
 
   setNotificationShown(true);
 
-  return () => {};
 }, []);
 
   return (
@@ -32,7 +31,7 @@ useEffect(() => {
       {...props}
     >
       {!mail.headerSubject && (
-        <p className="font-bold text-gray-300"> No Subject</p>
+        <p className="font-bold text-gray-300">No Subject</p>
       )}
       <p className="font-bold text-sky-700">
         {mail.headerSubject.length > 40
