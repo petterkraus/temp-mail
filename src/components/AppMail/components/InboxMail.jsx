@@ -12,8 +12,8 @@ export default function InboxMail({
 useEffect(() => {
   if (!mail || notificationShown || !notification) return;
 
-  const mailNotification = new Notification("New e-mail!", {
-    body: "Open the application to see your new e-mail!",
+  const mailNotification = new Notification("You've got mail!", {
+    body: "Open the Temp Mail to see your new e-mail!",
   });
 
   setTimeout(() => {
