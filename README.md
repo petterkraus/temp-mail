@@ -4,7 +4,7 @@
  Este projeto permite a geração de endereços de e-mail temporários, tornando mais fácil para você se inscrever em serviços online sem se preocupar com spam ou comunicações indesejadas no futuro.
 
 ## Licença
-Este projeto está licenciado sob a licença MIT.
+Este projeto está sob a licença MIT.
 
 # Recursos:
 
