@@ -1,9 +1,11 @@
-import {generateRandomString} from "./utils/randomString";
+import { generateRandomString } from "./utils/randomString";
 import Landing from "./components/Landing";
 import AppMail from "./components/AppMail";
 import api from "./service/API";
 import { createMailQuery, sessionQuery } from "./utils/querys";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
+import "react-toastify/dist/ReactToastify.min.css";
+import { ToastContainer, toast } from "react-toastify";
 
 import {
   restoreFromStorage,
@@ -165,8 +167,8 @@ function App() {
       const response = await api.post(`graphql/${validSession.token}`, {
         query,
       });
-    
-      if (!response.data.data.session.mails) return ;
+
+      if (!response.data.data.session.mails) return;
 
       const newMails = response.data.data.session.mails;
 
@@ -199,6 +201,12 @@ function App() {
   }
 
   function handleCopy() {
+    toast.success("Copied to clipboard", {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: true,
+      pauseOnHover: false,
+    });
     navigator.clipboard.writeText(sessionEmail);
   }
   return (
@@ -219,6 +227,8 @@ function App() {
           forceRefresh={forceRefresh}
         />
       )}
+
+      <ToastContainer />
     </>
   );
 }

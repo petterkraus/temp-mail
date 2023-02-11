@@ -7,7 +7,6 @@ import {
   IoMdRefresh,
   IoIosNotifications,
   IoMdNotificationsOff,
-  
 } from "react-icons/io";
 import { IoPower, IoArrowUpCircle } from "react-icons/io5";
 
@@ -64,18 +63,20 @@ export default function AppMail({
   };
 
   function handleNotification() {
-    if (sendNotification) {
-      return setSendNotification(false);
+    if (
+      Notification.permission === "default" ||
+      Notification.permission === "denied"
+    ) {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          return setSendNotification(true);
+        } else {
+          return setSendNotification(false);
+        }
+      });
     }
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        setSendNotification(true);
-      } else {
-        setSendNotification(false);
-      }
-    });
+    setSendNotification(!sendNotification);
   }
-
   return (
     <div className="h-screen">
       <div className={`flex flex-col items-center pt-7`}>
@@ -152,9 +153,7 @@ export default function AppMail({
             </>
           )}
         </div>
-        <div
-          className="w-full flex"
-        >
+        <div className="w-full flex">
           <OpenedMail openedEmail={openedEmail} />
         </div>
       </div>

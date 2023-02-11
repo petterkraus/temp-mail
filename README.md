@@ -26,17 +26,17 @@ Com esse endereço de e-mail temporário, você pode se inscrever em serviços o
 ## Instruções
 
 1.  Clone o repositório:
-````bash
+````shell
 git clone https://github.com/petterkraus/temp-mail.git
 ````
 
 2. Instale as dependências do projeto:
-````bash
+````shell
 npm i
 ````
 
 3. Inicie a aplicação em modo de desenvolvimento:
-````bash
+````shell
 npm run dev
 ````
 
@@ -79,11 +79,11 @@ Endereço da API: https://dropmailproxy.onrender.com
 
 ### Fase 4 - Inbox
 
-Com a compreensão da API, consegui montar a consulta corretamente e enviar o ID gerado aleatoriamente para a API GraphQL, o que iniciou a sessão de email. Isso me permitiu começar a construir a caixa de entrada de forma eficiente.
+Com a compreensão da API, consegui montar a consulta corretamente e enviar o ID gerado aleatoriamente para a API GraphQL, o que iniciou a sessão de email. Isso me permitiu começar a construir a caixa de entrada de forma eficiente. A aplicação se concentra no arquivo App.jsx, para um desenvolvimento mais rápido, sem a necessidade de usar o hook de contexto.
 
 ### Fase 5 - Persistência do e-mail
 
-Nesta fase, comecei a trabalhar na funcionalidade de persistência de emails utilizando o recurso de local storage. No entanto, ainda não implementei a validação para o caso em que o email tenha expirado.
+Nesta fase, comecei a trabalhar na funcionalidade de persistência de emails utilizando o recurso de local storage. Desenvolvi uma rotina de verificação de dados armazenados para restaurar a sessão e continuar a utilizar o e-mail. No entanto, ainda não implementei a validação para o caso em que o email tenha expirado.
 
 ### Fase 6 - Refatoração 
 
@@ -100,3 +100,7 @@ Nesta fase, as notificações foram implementadas usando a funcionalidade nativa
 ### Fase 9 - Responsividade
  
  Implementei a resposividade da aplicação para telas pequenas, garantindo uma melhor experiência ao usuário em dispositivos móveis.
+
+ ### Fase 10 - Revisão
+
+ Apliquei melhorias no código e adicionei uma notificação ao copiar o email para a área de transferência. O projeto está agora pronto para ser apresentado.
