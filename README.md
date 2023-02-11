@@ -10,7 +10,12 @@ Este projeto está sob a licença MIT.
 
 - Gerar endereço de e-mail temporário
 - Receber e-mails de serviços online
-- Notificações de e-mail
+- Notificações de e-mail instantâneas, inclusive em dispositivos móveis
+- Copiar para a área de transferência o endereço de email através de botão próprio
+- Enviar ou desativar notificações para a área de trabalho
+- Recuperar sessão de e-mail válida (expira em 10 minutos sem acesso)
+- Renderização de HTML para uma visualização mais fácil das mensagens, incluindo links de confirmação
+- Possibilidade de baixar e-mails completos por meio de um link ao lado do horário de recebimento.
 ## Como usar
 
 1. Acesse a aplicação através do link: [TempMail](https://temp-mail-petter.netlify.app/).
